@@ -7,7 +7,7 @@ export interface ParsedDocument {
 export interface TextBlock {
   type: "heading" | "paragraph" | "code" | "list" | "table";
   text: string;
-  level?: number;
-  path: string[];
+  level?: number;   // only for heading
+  path: string[];   // semantic path
   order: number;
 }
