@@ -1,0 +1,35 @@
+records:
+  support_ticket:
+    description: "Customer support ticket"
+    connector: "ticketing_stub"
+    id_field: "ticket_id"
+
+    updatable_fields:
+      - status
+      - priority
+      - assigned_team
+
+    constraints:
+      status:
+        - open
+        - in_progress
+        - resolved
+      priority:
+        - low
+        - medium
+        - high
+
+  service_request:
+    description: "Service issue raised by customer"
+    connector: "service_ops_stub"
+    id_field: "request_id"
+
+    updatable_fields:
+      - status
+      - resolution_note
+
+    constraints:
+      status:
+        - pending
+        - investigating
+        - resolved

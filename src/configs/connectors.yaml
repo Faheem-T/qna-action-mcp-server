@@ -1,0 +1,20 @@
+connectors:
+  ticketing_stub:
+    type: "http"
+    base_url: "http://localhost:4001/tickets"
+    auth:
+      method: "api_key"
+      env_var: "TICKETING_API_KEY"
+    timeout_ms: 5000
+
+  service_ops_stub:
+    type: "http"
+    base_url: "http://localhost:4002/service-ops"
+    auth:
+      method: "api_key"
+      env_var: "SERVICE_OPS_API_KEY"
+    timeout_ms: 5000
+
+  notification_slack:
+    type: "webhook"
+    webhook_env: "SLACK_WEBHOOK_URL"

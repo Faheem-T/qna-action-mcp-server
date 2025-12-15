@@ -1,0 +1,19 @@
+sampling:
+  confidence_threshold: 0.75
+  max_failed_attempts: 2
+
+  high_risk_intents:
+    - escalation_request
+
+  escalation_rules:
+    low_confidence:
+      action: create_ticket
+      reason: "Low intent confidence"
+
+    high_risk_intent:
+      action: send_notification
+      notify_channel: "on_call_support"
+
+    repeated_failure:
+      action: create_ticket
+      reason: "Multiple failed resolutions"

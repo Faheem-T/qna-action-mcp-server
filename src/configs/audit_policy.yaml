@@ -1,0 +1,15 @@
+audit:
+  enabled: true
+
+  log_events:
+    - intent_detected
+    - tool_proposed
+    - tool_executed
+    - tool_denied
+    - escalation_triggered
+
+  retention_days: 30
+
+  redact_fields:
+    - auth_token
+    - personal_data

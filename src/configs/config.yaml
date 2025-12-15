@@ -1,0 +1,16 @@
+tenant:
+  id: "telecom-demo"
+  name: "Telecom Support Bot"
+  industry: "telecom"
+
+version: "1.0.0"
+config_checksum: "auto-generated-at-load"
+
+files:
+  intents: "intents.yaml"
+  record_capabilities: "record_capabilities.yaml"
+  sampling: "sampling.yaml"
+  persona: "persona.yaml"
+  connectors: "connectors.yaml"
+  knowledge_base_index: "kb_index.yaml"
+  audit_policy: "audit_policy.yaml"

@@ -1,0 +1,10 @@
+knowledge_base:
+  backend: "local"
+  type: "markdown"
+  search_mode: "keyword"
+
+  documents_path: "./docs"
+
+  metadata:
+    language: "en"
+    last_updated: "2025-03-01"
