@@ -10,6 +10,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@google/genai": "^1.33.0",
     "@modelcontextprotocol/sdk": "^1.24.3",
     "js-tiktoken": "^1.0.21",
     "remark-gfm": "^4.0.1",
