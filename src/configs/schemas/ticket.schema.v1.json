@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "required": ["category", "priority", "summary", "description", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": ["bug", "outage", "access", "billing", "other"]
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 120
+    },
+    "description": {
+      "type": "string",
+      "minLength": 20
+    },
+    "source": {
+      "const": "llm_generated"
+    }
+  }
+}

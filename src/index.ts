@@ -6,7 +6,7 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Clean Architecture QnA Server running on stdio");
-  await vectorizeKnowledgeBaseUseCase.exec(knowledgeBaseDir);
+  // await vectorizeKnowledgeBaseUseCase.exec(knowledgeBaseDir);
 }
 
 if (import.meta.main) {

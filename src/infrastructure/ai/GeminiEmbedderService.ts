@@ -6,7 +6,9 @@ export class GeminiEmbedderService implements EmbedderService {
   private model: string = "gemini-embedding-001";
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    this.ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+    });
   }
 
   async embed(text: string): Promise<number[]> {

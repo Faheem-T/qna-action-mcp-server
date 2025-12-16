@@ -1,15 +1,13 @@
 import z from "zod";
 import { YAML } from "bun";
 
+// config file schemas
 const RootConfigSchema = z.object({
   files: z.object({
     intents: z.string(),
-    record_capabilities: z.string(),
-    sampling: z.string(),
     persona: z.string(),
-    connectors: z.string(),
     knowledge_base_index: z.string(),
-    // audit_policy: z.string(),
+    ticketing: z.string(),
   }),
 });
 
@@ -24,31 +22,6 @@ const IntentsFileSchema = z.object({
   intents: z.record(z.string(), IntentSchema),
 });
 
-const RecordSpec = z.object({
-  description: z.string().optional(),
-  connector: z.string(),
-  id_field: z.string(),
-  updatable_fields: z.array(z.string()).nonempty(),
-  constraints: z.record(z.string(), z.array(z.string())).optional(),
-});
-const RecordsFileSchema = z.object({
-  records: z.record(z.string(), RecordSpec),
-});
-
-const SamplingSchema = z.object({
-  sampling: z.object({
-    confidence_threshold: z.number().min(0).max(1),
-    min_attempts_before_escalation: z
-      .number()
-      .int()
-      .min(0)
-      .optional()
-      .default(1),
-    high_risk_intents: z.array(z.string()).optional().default([]),
-    escalation_actions: z.record(z.string(), z.string()).optional(),
-  }),
-});
-
 const PersonaSchema = z.object({
   personas: z.record(
     z.string(),
@@ -60,18 +33,6 @@ const PersonaSchema = z.object({
   default: z.string(),
 });
 
-const ConnectorsSchema = z.object({
-  connectors: z.record(
-    z.string(),
-    z.object({
-      type: z.string(),
-      base_url: z.string().optional(),
-      auth_env: z.string().optional(),
-      timeout_ms: z.number().int().optional(),
-    }),
-  ),
-});
-
 const KnowledgeBaseIndexSchema = z.object({
   knowledge_base: z.object({
     backend: z.enum(["local", "api"]),
@@ -79,20 +40,19 @@ const KnowledgeBaseIndexSchema = z.object({
   }),
 });
 
-// loader helper
-async function loadYaml(path: string) {
-  const file = Bun.file(path);
-  const text = await file.text();
-  return YAML.parse(text);
-}
+const TicketingSchema = z.object({
+  schema: z.string(),
+  endpoint: z.string(),
+  method: z.string(),
+});
+
+// config object interfaces
 
 interface Config {
   intents: Record<string, IntentSpec>;
-  records: Record<string, RecordSpec>;
-  sampling: SamplingSpec;
   persona: PersonaSpec;
-  connectors: ConnectorsSpec;
   knowledge_base: KnowledgeBaseIndexSpec;
+  ticketing: TicketingSpec;
 }
 
 interface IntentSpec {
@@ -100,21 +60,6 @@ interface IntentSpec {
   allowed_tools: string[];
   requires_auth: boolean;
   risk_level: "low" | "medium" | "high";
-}
-
-interface RecordSpec {
-  description?: string;
-  connector: string;
-  id_field: string;
-  updatable_fields: string[];
-  constraints?: Record<string, string[]>;
-}
-
-interface SamplingSpec {
-  confidence_threshold: number;
-  min_attempts_before_escalation: number;
-  high_risk_intents: string[];
-  escalation_actions?: Record<string, string>;
 }
 
 interface PersonaSpec {
@@ -127,24 +72,17 @@ interface PersonaSpec {
   >;
   default: string;
 }
-
-interface ConnectorsSpec {
-  connectors: Record<
-    string,
-    {
-      type: string;
-      base_url?: string;
-      auth_env?: string;
-      timeout_ms?: number;
-    }
-  >;
-}
-
 interface KnowledgeBaseIndexSpec {
   knowledge_base: {
     backend: "local" | "api";
     documents_path: string;
   };
+}
+
+interface TicketingSpec {
+  schema: string;
+  endpoint: string;
+  method: string;
 }
 
 export async function loadConfigs(configFolder: string): Promise<Config> {
@@ -160,20 +98,17 @@ export async function loadConfigs(configFolder: string): Promise<Config> {
   const intents = await loadYaml(
     `${configFolder}/${rootConfigRes.data.files.intents}`,
   );
-  const records = await loadYaml(
-    `${configFolder}/${rootConfigRes.data.files.record_capabilities}`,
-  );
-  const sampling = await loadYaml(
-    `${configFolder}/${rootConfigRes.data.files.sampling}`,
-  );
+
   const persona = await loadYaml(
     `${configFolder}/${rootConfigRes.data.files.persona}`,
   );
-  const connectors = await loadYaml(
-    `${configFolder}/${rootConfigRes.data.files.connectors}`,
-  );
+
   const kbIndex = await loadYaml(
     `${configFolder}/${rootConfigRes.data.files.knowledge_base_index}`,
+  );
+
+  const ticketing = await loadYaml(
+    `${configFolder}/${rootConfigRes.data.files.ticketing}`,
   );
 
   const intentsRes = IntentsFileSchema.safeParse(intents);
@@ -183,32 +118,11 @@ export async function loadConfigs(configFolder: string): Promise<Config> {
         JSON.stringify(z.treeifyError(intentsRes.error), null, 2),
     );
 
-  const recordsRes = RecordsFileSchema.safeParse(records);
-  if (!recordsRes.success)
-    throw new Error(
-      "record_capabilities.yaml invalid: " +
-        JSON.stringify(z.treeifyError(recordsRes.error), null, 2),
-    );
-
-  const samplingRes = SamplingSchema.safeParse(sampling);
-  if (!samplingRes.success)
-    throw new Error(
-      "sampling.yaml invalid: " +
-        JSON.stringify(z.treeifyError(samplingRes.error), null, 2),
-    );
-
   const personaRes = PersonaSchema.safeParse(persona);
   if (!personaRes.success)
     throw new Error(
       "persona.yaml invalid: " +
         JSON.stringify(z.treeifyError(personaRes.error), null, 2),
-    );
-
-  const connectorsRes = ConnectorsSchema.safeParse(connectors);
-  if (!connectorsRes.success)
-    throw new Error(
-      "connectors.yaml invalid: " +
-        JSON.stringify(z.treeifyError(connectorsRes.error), null, 2),
     );
 
   const kbIndexRes = KnowledgeBaseIndexSchema.safeParse(kbIndex);
@@ -218,23 +132,28 @@ export async function loadConfigs(configFolder: string): Promise<Config> {
         JSON.stringify(z.treeifyError(kbIndexRes.error), null, 2),
     );
 
-  // cross-file checks
-  // 1) every record.connector exists in connectors
-  for (const [name, rec] of Object.entries(recordsRes.data.records)) {
-    if (!(rec.connector in connectorsRes.data.connectors)) {
-      throw new Error(
-        `record_capabilities.yaml: record "${name}" references unknown connector "${rec.connector}"`,
-      );
-    }
-    // TODO: check that intent allowed_tools are valid after defining the tools
+  const ticketingRes = TicketingSchema.safeParse(ticketing);
+
+  if (!ticketingRes.success) {
+    throw new Error(
+      "ticketing yaml invalid: " +
+        JSON.stringify(z.treeifyError(ticketingRes.error), null, 2),
+    );
   }
+
+  // TODO: check that intent allowed_tools are valid after defining the tools
 
   return {
     intents: intentsRes.data.intents,
-    records: recordsRes.data.records,
-    sampling: samplingRes.data.sampling,
     persona: personaRes.data,
-    connectors: connectorsRes.data,
     knowledge_base: kbIndexRes.data,
+    ticketing: ticketingRes.data,
   };
+}
+
+// loader helper
+async function loadYaml(path: string) {
+  const file = Bun.file(path);
+  const text = await file.text();
+  return YAML.parse(text);
 }

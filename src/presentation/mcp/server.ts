@@ -1,5 +1,4 @@
 import z from "zod";
-import { loadConfigs } from "../../config-schemas";
 import {
   McpServer,
   ResourceTemplate,
@@ -8,11 +7,8 @@ import type {
   CallToolResult,
   ReadResourceResult,
 } from "@modelcontextprotocol/sdk/types.js";
-import { fs, searchUseCase } from "../../di";
-
-const CONFIG_FOLDER = import.meta.dir + "/../../configs";
-
-const config = await loadConfigs(CONFIG_FOLDER);
+import { createTicketUsecase, fs, searchUseCase } from "../../di";
+import { config, CONFIG_FOLDER } from "../../utils/loadConfig";
 
 const outputIntentSchema = z.record(
   z.string(),
@@ -144,3 +140,22 @@ server.registerResource(
     };
   },
 );
+
+// TODO: create ticket tool
+server.registerTool(
+  "create_ticket",
+  {
+    title: "Create Ticket",
+    description: "Create a ticket for the users query",
+    inputSchema: {},
+  },
+  async (): Promise<CallToolResult> => {
+    createTicketUsecase.exec({});
+
+    return { content: [] };
+  },
+);
+
+// TODO: update record tool
+
+// TODO: send notification tool

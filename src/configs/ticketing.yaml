@@ -1,0 +1,3 @@
+schema: ticket.schema.v1.json
+endpoint: localhost:4000/api/ticketing
+method: POST
