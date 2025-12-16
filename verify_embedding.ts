@@ -1,8 +1,8 @@
-import { chunkDocument } from "./src/chunkers/documentChunker";
-import { db } from "./src/db/db";
-import { kbChunksTable } from "./src/db/schemas/kbChunksTable";
-import { embedChunks } from "./src/embedder/embedChunks";
-import { markdownParser } from "./src/parsers/markdown_parser";
+import { chunkDocument } from "./src/old/chunkers/documentChunker";
+import { db } from "./src/old/db/db";
+import { kbChunksTable } from "./src/old/db/schemas/kbChunksTable";
+import { embedChunks } from "./src/old/embedder/embedChunks";
+import { markdownParser } from "./src/old/parsers/markdown_parser";
 
 async function main() {
   const text = await Bun.file(

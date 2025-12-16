@@ -57,7 +57,7 @@ const PersonaSchema = z.object({
       max_length: z.number().int().positive().optional(),
     }),
   ),
-  default: z.string().optional(),
+  default: z.string(),
 });
 
 const ConnectorsSchema = z.object({
@@ -87,7 +87,63 @@ async function loadYaml(path: string) {
   return YAML.parse(text);
 }
 
-export async function loadConfigs(configFolder: string) {
+interface Config {
+  intents: Record<string, IntentSpec>;
+  records: Record<string, RecordSpec>;
+  sampling: SamplingSpec;
+  persona: PersonaSpec;
+  connectors: ConnectorsSpec;
+  knowledge_base: KnowledgeBaseIndexSpec;
+}
+
+interface IntentSpec {
+  description: string;
+  allowed_tools: string[];
+  requires_auth: boolean;
+  risk_level: "low" | "medium" | "high";
+}
+
+interface RecordSpec {
+  description?: string;
+  connector: string;
+  id_field: string;
+  updatable_fields: string[];
+  constraints?: Record<string, string[]>;
+}
+
+interface SamplingSpec {
+  confidence_threshold: number;
+  min_attempts_before_escalation: number;
+  high_risk_intents: string[];
+  escalation_actions?: Record<string, string>;
+}
+
+interface PersonaSpec {
+  personas: Record<string, {
+    system_prompt: string;
+    max_length?: number;
+  }>;
+  default: string;
+}
+
+interface ConnectorsSpec {
+  connectors: Record<string, {
+    type: string;
+    base_url?: string;
+    auth_env?: string;
+    timeout_ms?: number;
+  }>;
+}
+
+interface KnowledgeBaseIndexSpec {
+  knowledge_base: {
+    backend: "local" | "api";
+    type: string;
+    documents_path: string;
+  };
+}
+
+export async function loadConfigs(configFolder: string): Promise<Config> {
   const rootConfig = await loadYaml(`${configFolder}/config.yaml`);
 
   const rootConfigRes = RootConfigSchema.safeParse(rootConfig);
@@ -174,7 +230,7 @@ export async function loadConfigs(configFolder: string) {
     records: recordsRes.data.records,
     sampling: samplingRes.data.sampling,
     persona: personaRes.data,
-    connectors: connectorsRes.data.connectors,
-    kb: kbIndexRes.data.knowledge_base,
+    connectors: connectorsRes.data,
+    knowledge_base: kbIndexRes.data,
   };
 }

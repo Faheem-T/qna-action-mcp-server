@@ -1,5 +1,5 @@
-import { chunkDocument } from "./src/chunkers/documentChunker";
-import { markdownParser } from "./src/parsers/markdown_parser";
+import { chunkDocument } from "./src/old/chunkers/documentChunker";
+import { markdownParser } from "./src/old/parsers/markdown_parser";
 
 async function main() {
   const text = await Bun.file(
