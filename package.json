@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start": "bun run ./src/index.ts",
+    "vectorize_kb": "bun run ./src/utils/vectorizeKB.ts",
     "syncDb": "drizzle-kit push --config=./src/infrastructure/db/config/drizzleConfig.ts"
   },
   "devDependencies": {

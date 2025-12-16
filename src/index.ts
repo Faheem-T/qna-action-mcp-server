@@ -1,12 +1,10 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { knowledgeBaseDir, server } from "./presentation/mcp/server";
-import { vectorizeKnowledgeBaseUseCase } from "./di";
+import { server } from "./presentation/mcp/server";
 
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Clean Architecture QnA Server running on stdio");
-  // await vectorizeKnowledgeBaseUseCase.exec(knowledgeBaseDir);
 }
 
 if (import.meta.main) {
