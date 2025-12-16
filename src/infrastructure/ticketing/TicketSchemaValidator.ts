@@ -11,7 +11,7 @@ export class TicketSchemaValidator implements ISchemaValidator {
   validate = async (input: any): Promise<void> => {
     const valid = this._validate(input);
     if (!valid) {
-      console.log(this._validate.errors);
+      throw this._validate.errors;
     }
   };
 }

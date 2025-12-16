@@ -9,6 +9,7 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import { createTicketUsecase, fs, searchUseCase } from "../../di";
 import { config, CONFIG_FOLDER } from "../../utils/loadConfig";
+import { ticketSchema } from "../../utils/loadTicketSchema";
 
 const outputIntentSchema = z.record(
   z.string(),
@@ -141,18 +142,47 @@ server.registerResource(
   },
 );
 
+server.registerResource(
+  "ticket_schema",
+  "file:///ticket_schema.json",
+  {
+    description:
+      "A resource that outlines what the structure of a ticket is supposed to look like",
+  },
+  async (uri): Promise<ReadResourceResult> => {
+    return {
+      contents: [
+        {
+          uri: uri.href,
+          text: JSON.stringify(ticketSchema),
+        },
+      ],
+    };
+  },
+);
+
 // TODO: create ticket tool
 server.registerTool(
   "create_ticket",
   {
     title: "Create Ticket",
     description: "Create a ticket for the users query",
-    inputSchema: {},
+    inputSchema: { ticket: z.record(z.string(), z.any()) },
   },
-  async (): Promise<CallToolResult> => {
-    createTicketUsecase.exec({});
-
-    return { content: [] };
+  async ({ ticket }): Promise<CallToolResult> => {
+    console.error(ticket);
+    try {
+      await createTicketUsecase.exec(ticket);
+      return {
+        content: [{ type: "text", text: "Ticket created successfully" }],
+      };
+    } catch (err) {
+      console.error(err);
+      return {
+        content: [{ type: "text", text: "Error when creating ticket" }],
+        isError: true,
+      };
+    }
   },
 );
 
