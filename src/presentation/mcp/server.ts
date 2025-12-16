@@ -39,6 +39,7 @@ export const server = new McpServer({
   version: "1.0.0",
 });
 
+// search kb tool
 server.registerTool(
   "search_knowledge_base",
   {
@@ -73,6 +74,7 @@ server.registerTool(
   },
 );
 
+// intents resource
 server.registerResource(
   "intents",
   "file:///intents.json",
@@ -93,6 +95,7 @@ server.registerResource(
   },
 );
 
+// persona resource
 server.registerResource(
   "persona",
   "file:///persona.json",
@@ -109,6 +112,7 @@ server.registerResource(
   },
 );
 
+// knowledge base document retrieval resource
 server.registerResource(
   "knowledge",
   new ResourceTemplate("file://{filename}", {

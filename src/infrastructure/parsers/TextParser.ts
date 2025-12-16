@@ -1,6 +1,6 @@
 import type { ParsedDocument } from "../../domain/entities/ParsedDocument";
 import type { DocumentParser } from "../../domain/services/DocumentParser";
-import type { TextBlock } from "../../old/types/ParsedDocument";
+import type { TextBlock } from "../../domain/entities/ParsedDocument";
 
 export class TextParser implements DocumentParser {
   supports = (mimeType: string): boolean => mimeType.startsWith("text/plain");
