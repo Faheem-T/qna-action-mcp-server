@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "syncDb": "drizzle-kit push --config=./src/db/config/drizzleConfig.ts"
+    "syncDb": "drizzle-kit push --config=./src/infrastructure/db/config/drizzleConfig.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

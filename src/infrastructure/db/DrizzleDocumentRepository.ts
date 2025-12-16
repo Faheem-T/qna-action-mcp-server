@@ -1,10 +1,12 @@
 import type { DocumentRepository } from "../../domain/repositories/DocumentRepository";
 import type { KBChunk } from "../../domain/entities/KBChunk";
-import { db } from "../../old/db/db";
-import { kbChunksTable } from "../../old/db/schemas/kbChunksTable";
-import { cosineDistance, desc, gt, sql } from "drizzle-orm";
+import { kbChunksTable } from "./schemas/kbChunksTable";
+import { cosineDistance, desc, sql } from "drizzle-orm";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 export class DrizzleDocumentRepository implements DocumentRepository {
+  constructor(private _db: NodePgDatabase) {}
+
   async saveChunks(chunks: KBChunk[], source: string): Promise<void> {
     const records = chunks.map((chunk) => ({
       content: chunk.text,
@@ -15,17 +17,20 @@ export class DrizzleDocumentRepository implements DocumentRepository {
 
     // Chunking inserts if necessary, but for now simple insert
     if (records.length > 0) {
-      await db.insert(kbChunksTable).values(records);
+      await this._db.insert(kbChunksTable).values(records);
     }
   }
 
-  async findSimilarChunks(embedding: number[], k: number = 5): Promise<KBChunk[]> {
+  async findSimilarChunks(
+    embedding: number[],
+    k: number = 5,
+  ): Promise<KBChunk[]> {
     const similarity = sql<number>`1 - (${cosineDistance(
       kbChunksTable.embedding,
-      embedding
+      embedding,
     )})`;
 
-    const results = await db
+    const results = await this._db
       .select({
         text: kbChunksTable.content,
         embedding: kbChunksTable.embedding,

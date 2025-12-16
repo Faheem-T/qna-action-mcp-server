@@ -3,7 +3,10 @@ import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import { visit, SKIP } from "unist-util-visit";
 import type { DocumentParser } from "../../domain/services/DocumentParser";
-import type { ParsedDocument, TextBlock } from "../../domain/entities/ParsedDocument";
+import type {
+  ParsedDocument,
+  TextBlock,
+} from "../../domain/entities/ParsedDocument";
 
 function extractText(nodes: any[]): string {
   return nodes
@@ -15,7 +18,12 @@ function extractText(nodes: any[]): string {
 }
 
 export class RemarkMarkdownParser implements DocumentParser {
-  async parse(content: string, sourceId: string, fileType: string): Promise<ParsedDocument> {
+  supports = (mimeType: string): boolean => mimeType === "text/markdown";
+  async parse(
+    content: string,
+    sourceId: string,
+    fileType: string,
+  ): Promise<ParsedDocument> {
     const tree = unified().use(remarkParse).use(remarkGfm).parse(content);
 
     const blocks: TextBlock[] = [];
@@ -26,7 +34,10 @@ export class RemarkMarkdownParser implements DocumentParser {
       if (node.type === "heading") {
         const text = extractText(node.children).trim();
 
-        while (headingStack.length && headingStack.at(-1)!.depth >= node.depth) {
+        while (
+          headingStack.length &&
+          headingStack.at(-1)!.depth >= node.depth
+        ) {
           headingStack.pop();
         }
 

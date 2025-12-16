@@ -24,7 +24,7 @@ const outputIntentSchema = z.record(
 
 const intents = outputIntentSchema.parse(config.intents);
 
-const knowledgeBaseDir =
+export const knowledgeBaseDir =
   CONFIG_FOLDER + "/" + config.knowledge_base.knowledge_base.documents_path;
 
 const knowledgeBaseFiles = await fs.getAllDirectoryFileNames(knowledgeBaseDir);
