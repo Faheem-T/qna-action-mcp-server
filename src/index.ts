@@ -1,30 +1,30 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { GeminiEmbedderService } from "./infrastructure/ai/GeminiEmbedderService";
-import { DrizzleDocumentRepository } from "./infrastructure/db/DrizzleDocumentRepository";
-import { RemarkMarkdownParser } from "./infrastructure/parsers/RemarkMarkdownParser";
-import { SlidingWindowChunker } from "./infrastructure/chunkers/SlidingWindowChunker";
+import { loadConfigs } from "./config-schemas";
+import type {
+  CallToolResult,
+  ReadResourceResult,
+} from "@modelcontextprotocol/sdk/types.js";
+import { searchUseCase } from "./di";
 
-import { IngestDocumentUseCase } from "./application/use-cases/IngestDocumentUseCase";
-import { SearchKnowledgeBaseUseCase } from "./application/use-cases/SearchKnowledgeBaseUseCase";
+const config = await loadConfigs(import.meta.dir + "/configs");
 
-// 1. Initialize Infrastructure
-const embedder = new GeminiEmbedderService();
-const repository = new DrizzleDocumentRepository();
-const parser = new RemarkMarkdownParser();
-const chunker = new SlidingWindowChunker();
+const outputIntentSchema = z.record(
+  z.string(),
+  z.object({
+    description: z.string(),
+    allowed_tools: z.array(z.string()).nonempty(),
+  }),
+);
 
-// 2. Initialize Use Cases
-const ingestUseCase = new IngestDocumentUseCase(parser, chunker, embedder, repository);
-const searchUseCase = new SearchKnowledgeBaseUseCase(embedder, repository);
+const intents = outputIntentSchema.parse(config.intents);
 
 // 3. Setup MCP Server
 const server = new McpServer({
   name: "clean_qna_server",
   version: "1.0.0",
 });
-
 
 server.registerTool(
   "search_knowledge_base",
@@ -33,9 +33,10 @@ server.registerTool(
       query: z.string().describe("The search query"),
       k: z.number().default(5).describe("Number of results to return"),
     },
-    outputSchema: {},
+    outputSchema: { text: z.string() },
+    description: "Search knowledge base for relevant documents",
   },
-  async ({ query, k }) => {
+  async ({ query, k }): Promise<CallToolResult> => {
     try {
       const results = await searchUseCase.execute(query, k);
       const textResponse = results
@@ -56,6 +57,42 @@ server.registerTool(
         isError: true,
       };
     }
+  },
+);
+
+server.registerResource(
+  "intents",
+  "file:///intents.json",
+  {
+    description: "A resource to classify the intent of the users query",
+    mimeType: "application/json",
+  },
+  async (): Promise<ReadResourceResult> => {
+    return {
+      contents: [
+        {
+          uri: "file:///intents.json",
+          text: JSON.stringify(intents),
+          mimeType: "application/json",
+        },
+      ],
+    };
+  },
+);
+
+server.registerResource(
+  "persona",
+  "file:///persona.json",
+  { description: "A resource that defines the persona of the LLM model" },
+  async (): Promise<ReadResourceResult> => {
+    return {
+      contents: [
+        {
+          uri: "file:///persona.json",
+          text: JSON.stringify(config.persona),
+        },
+      ],
+    };
   },
 );
 
