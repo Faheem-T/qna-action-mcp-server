@@ -1,7 +1,6 @@
 import type { DocumentRepository } from "../../domain/repositories/DocumentRepository";
 import type { DocumentChunker } from "../../domain/services/DocumentChunker";
 import type { EmbedderService } from "../../domain/services/EmbedderService";
-import type { IFileSystemService } from "../../domain/services/FileSystemService";
 import type { IParserFactory } from "../../domain/services/IParserFactory";
 
 export class IngestDocumentUsecase {
