@@ -1,4 +1,6 @@
 import { chunkDocument } from "./src/chunkers/documentChunker";
+import { db } from "./src/db/db";
+import { kbChunksTable } from "./src/db/schemas/kbChunksTable";
 import { embedChunks } from "./src/embedder/embedChunks";
 import { markdownParser } from "./src/parsers/markdown_parser";
 
@@ -19,7 +21,17 @@ async function main() {
   const embeddings = await embedChunks(chunks);
 
   console.log(`Document embedded. Total embeddings: ${embeddings?.length}`);
-  console.log(embeddings)
+
+  await db.insert(kbChunksTable).values(
+    embeddings.map((embedding, index) => ({
+      id: crypto.randomUUID(),
+      content: chunks[index]!.text,
+      embedding,
+      source: chunks[index]!.sourceId,
+    })),
+  );
+
+  console.log(await db.select().from(kbChunksTable));
 }
 
 main();

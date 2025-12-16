@@ -3,8 +3,13 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "syncDb": "drizzle-kit push --config=./src/db/config/drizzleConfig.ts"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/pg": "^8.16.0",
+    "drizzle-kit": "^0.31.8"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -12,7 +17,9 @@
   "dependencies": {
     "@google/genai": "^1.33.0",
     "@modelcontextprotocol/sdk": "^1.24.3",
+    "drizzle-orm": "^0.45.1",
     "js-tiktoken": "^1.0.21",
+    "pg": "^8.16.3",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "unified": "^11.0.5",
