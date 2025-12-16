@@ -1,9 +1,6 @@
 knowledge_base:
   backend: "local"
-  type: "markdown"
-  search_mode: "keyword"
-
-  documents_path: "./docs"
+  documents_path: "../kb"
 
   metadata:
     language: "en"

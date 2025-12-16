@@ -75,7 +75,6 @@ const ConnectorsSchema = z.object({
 const KnowledgeBaseIndexSchema = z.object({
   knowledge_base: z.object({
     backend: z.enum(["local", "api"]),
-    type: z.string().nonempty(),
     documents_path: z.string().nonempty(),
   }),
 });
@@ -119,26 +118,31 @@ interface SamplingSpec {
 }
 
 interface PersonaSpec {
-  personas: Record<string, {
-    system_prompt: string;
-    max_length?: number;
-  }>;
+  personas: Record<
+    string,
+    {
+      system_prompt: string;
+      max_length?: number;
+    }
+  >;
   default: string;
 }
 
 interface ConnectorsSpec {
-  connectors: Record<string, {
-    type: string;
-    base_url?: string;
-    auth_env?: string;
-    timeout_ms?: number;
-  }>;
+  connectors: Record<
+    string,
+    {
+      type: string;
+      base_url?: string;
+      auth_env?: string;
+      timeout_ms?: number;
+    }
+  >;
 }
 
 interface KnowledgeBaseIndexSpec {
   knowledge_base: {
     backend: "local" | "api";
-    type: string;
     documents_path: string;
   };
 }
