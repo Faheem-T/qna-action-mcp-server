@@ -112,8 +112,16 @@ server.registerResource(
 // knowledge base document retrieval resource
 server.registerResource(
   "knowledge",
-  new ResourceTemplate("file://{filename}", {
-    list: undefined,
+  new ResourceTemplate("file://{filename}/", {
+    list: () => {
+      return {
+        resources: knowledgeBaseFiles.map((filename) => ({
+          name: filename,
+          uri: `file://${filename}`,
+          mimeType: Bun.file(filename).type,
+        })),
+      };
+    },
     complete: {
       filename: (value) => {
         return knowledgeBaseFiles.filter((filename) =>
