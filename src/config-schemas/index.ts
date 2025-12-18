@@ -23,11 +23,17 @@ const IntentsFileSchema = z.object({
 });
 
 const PersonaSchema = z.object({
+  name: z.string(),
+  system_prompt: z.string(),
+  max_response_tokens: z.number().int().positive().optional(),
+});
+
+const PersonaConfigSchema = z.object({
   personas: z.record(
     z.string(),
     z.object({
       system_prompt: z.string(),
-      max_length: z.number().int().positive().optional(),
+      max_response_tokens: z.number().int().positive().optional(),
     }),
   ),
   default: z.string(),
@@ -63,14 +69,9 @@ interface IntentSpec {
 }
 
 interface PersonaSpec {
-  personas: Record<
-    string,
-    {
-      system_prompt: string;
-      max_length?: number;
-    }
-  >;
-  default: string;
+  name: string;
+  system_prompt: string;
+  max_response_tokens?: number;
 }
 interface KnowledgeBaseIndexSpec {
   knowledge_base: {
@@ -95,44 +96,46 @@ export async function loadConfigs(configFolder: string): Promise<Config> {
         JSON.stringify(z.treeifyError(rootConfigRes.error), null, 2),
     );
 
-  const intents = await loadYaml(
+  // Loading config files
+  const intentsConfig = await loadYaml(
     `${configFolder}/${rootConfigRes.data.files.intents}`,
   );
 
-  const persona = await loadYaml(
+  const personaConfig = await loadYaml(
     `${configFolder}/${rootConfigRes.data.files.persona}`,
   );
 
-  const kbIndex = await loadYaml(
+  const kbIndexConfig = await loadYaml(
     `${configFolder}/${rootConfigRes.data.files.knowledge_base_index}`,
   );
 
-  const ticketing = await loadYaml(
+  const ticketingConfig = await loadYaml(
     `${configFolder}/${rootConfigRes.data.files.ticketing}`,
   );
 
-  const intentsRes = IntentsFileSchema.safeParse(intents);
+  // validating config files
+  const intentsRes = IntentsFileSchema.safeParse(intentsConfig);
   if (!intentsRes.success)
     throw new Error(
       "intents.yaml invalid: " +
         JSON.stringify(z.treeifyError(intentsRes.error), null, 2),
     );
 
-  const personaRes = PersonaSchema.safeParse(persona);
+  const personaRes = PersonaConfigSchema.safeParse(personaConfig);
   if (!personaRes.success)
     throw new Error(
       "persona.yaml invalid: " +
         JSON.stringify(z.treeifyError(personaRes.error), null, 2),
     );
 
-  const kbIndexRes = KnowledgeBaseIndexSchema.safeParse(kbIndex);
+  const kbIndexRes = KnowledgeBaseIndexSchema.safeParse(kbIndexConfig);
   if (!kbIndexRes.success)
     throw new Error(
       "knowledge base index yaml invalid: " +
         JSON.stringify(z.treeifyError(kbIndexRes.error), null, 2),
     );
 
-  const ticketingRes = TicketingSchema.safeParse(ticketing);
+  const ticketingRes = TicketingSchema.safeParse(ticketingConfig);
 
   if (!ticketingRes.success) {
     throw new Error(
@@ -143,9 +146,18 @@ export async function loadConfigs(configFolder: string): Promise<Config> {
 
   // TODO: check that intent allowed_tools are valid after defining the tools
 
+  const defaultPersona = Object.entries(personaRes.data.personas).find(
+    ([name, { system_prompt, max_response_tokens }]) =>
+      name === personaRes.data.default,
+  );
+
+  if (!defaultPersona) {
+    throw new Error(`Default persona (${personaRes.data.default}) not found`);
+  }
+
   return {
     intents: intentsRes.data.intents,
-    persona: personaRes.data,
+    persona: { name: defaultPersona[0], ...defaultPersona[1] },
     knowledge_base: kbIndexRes.data,
     ticketing: ticketingRes.data,
   };
