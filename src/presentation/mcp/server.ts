@@ -149,12 +149,15 @@ Usage:
   },
   async (uri, { filename }): Promise<ReadResourceResult> => {
     if (!filename) {
+      console.error(`File name not provided`);
       return { contents: [{ text: "Filename is required", uri: uri.href }] };
     }
     if (typeof filename !== "string") {
+      console.error(`Invalid filename: ${filename} `);
       return { contents: [{ text: "Invalid filename", uri: uri.href }] };
     }
     if (!knowledgeBaseFiles.includes(filename)) {
+      console.error(`File not found ${filename} `);
       return { contents: [{ text: "File not found", uri: uri.href }] };
     }
 
