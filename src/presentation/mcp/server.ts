@@ -10,6 +10,7 @@ import type {
 import { createTicketUsecase, fs, searchUseCase } from "../../di";
 import { config, CONFIG_FOLDER } from "../../utils/loadConfig";
 import { ticketSchema } from "../../utils/loadTicketSchema";
+import { MCPServerTools } from "../../constants/mcpServerToolNames";
 
 const outputIntentSchema = z.record(
   z.string(),
@@ -38,7 +39,7 @@ export const server = new McpServer({
 
 // search kb tool
 server.registerTool(
-  "search_knowledge_base",
+  MCPServerTools.SEARCH_KB_TOOL,
   {
     inputSchema: {
       query: z.string().describe("The search query"),
@@ -190,7 +191,7 @@ server.registerResource(
 
 // TODO: create ticket tool
 server.registerTool(
-  "create_ticket",
+  MCPServerTools.CREATE_TICKET_TOOL,
   {
     title: "Create Ticket",
     description: "Create a ticket for the users query",

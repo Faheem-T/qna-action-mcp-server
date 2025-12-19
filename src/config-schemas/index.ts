@@ -1,5 +1,9 @@
 import z from "zod";
 import { YAML } from "bun";
+import {
+  MCPServerToolNames,
+  MCPServerTools,
+} from "../constants/mcpServerToolNames";
 
 // config file schemas
 const RootConfigSchema = z.object({
@@ -145,7 +149,15 @@ export async function loadConfigs(configFolder: string): Promise<Config> {
   }
 
   // TODO: check that intent allowed_tools are valid after defining the tools
+  for (const [k, v] of Object.entries(intentsRes.data.intents)) {
+    for (const tool of v.allowed_tools) {
+      if (!MCPServerToolNames.includes(tool as any)) {
+        throw new Error(`Unknown tool defined in intents config: ${tool}`);
+      }
+    }
+  }
 
+  // Getting the default persona set in config
   const defaultPersona = Object.entries(personaRes.data.personas).find(
     ([name, { system_prompt, max_response_tokens }]) =>
       name === personaRes.data.default,
