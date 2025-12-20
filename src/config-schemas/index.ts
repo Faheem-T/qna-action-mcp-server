@@ -1,9 +1,6 @@
 import z from "zod";
 import { YAML } from "bun";
-import {
-  MCPServerToolNames,
-  MCPServerTools,
-} from "../constants/mcpServerToolNames";
+import { MCPServerToolNames } from "../constants/mcpServerToolNames";
 
 // config file schemas
 const RootConfigSchema = z.object({
@@ -16,6 +13,7 @@ const RootConfigSchema = z.object({
 });
 
 const IntentSchema = z.object({
+  name: z.string(),
   description: z.string(),
   allowed_tools: z.array(z.string()).nonempty(),
   requires_auth: z.boolean().optional().default(false),
@@ -23,7 +21,7 @@ const IntentSchema = z.object({
 });
 
 const IntentsFileSchema = z.object({
-  intents: z.record(z.string(), IntentSchema),
+  intents: z.array(IntentSchema),
 });
 
 const PersonaSchema = z.object({
@@ -59,13 +57,14 @@ const TicketingSchema = z.object({
 // config object interfaces
 
 interface Config {
-  intents: Record<string, IntentSpec>;
+  intents: IntentSpec[];
   persona: PersonaSpec;
   knowledge_base: KnowledgeBaseIndexSpec;
   ticketing: TicketingSpec;
 }
 
 interface IntentSpec {
+  name: string;
   description: string;
   allowed_tools: string[];
   requires_auth: boolean;

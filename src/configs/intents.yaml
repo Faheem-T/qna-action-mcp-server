@@ -1,12 +1,12 @@
 intents:
-  informational_query:
+  - name: informational_query
     description: "User wants information only"
     allowed_tools:
       - search_knowledge
     requires_auth: false
     risk_level: low
 
-  issue_report:
+  - name: issue_report
     description: "User reports a problem or outage"
     allowed_tools:
       - search_knowledge
@@ -15,14 +15,14 @@ intents:
     requires_auth: false
     risk_level: medium
 
-  record_update_request:
+  - name: record_update_request
     description: "User requests a change to an existing record"
     allowed_tools:
       - update_record
     requires_auth: true
     risk_level: medium
 
-  escalation_request:
+  - name: escalation_request
     description: "User explicitly requests human assistance"
     allowed_tools:
       - create_ticket

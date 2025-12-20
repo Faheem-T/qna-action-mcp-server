@@ -10,17 +10,11 @@ import type {
 import { createTicketUsecase, fs, searchUseCase } from "../../di";
 import { config, CONFIG_FOLDER } from "../../utils/loadConfig";
 import { ticketSchema } from "../../utils/loadTicketSchema";
-import { MCPServerTools } from "../../constants/mcpServerToolNames";
-
-const outputIntentSchema = z.record(
-  z.string(),
-  z.object({
-    description: z.string(),
-    allowed_tools: z.array(z.string()).nonempty(),
-  }),
-);
-
-const intents = outputIntentSchema.parse(config.intents);
+import {
+  MCPServerToolNames,
+  MCPServerTools,
+} from "../../constants/mcpServerToolNames";
+import { IntentResource } from "./resources/IntentResource";
 
 export const knowledgeBaseDir =
   CONFIG_FOLDER + "/" + config.knowledge_base.knowledge_base.documents_path;
@@ -44,11 +38,15 @@ server.registerTool(
     inputSchema: {
       query: z.string().describe("The search query"),
       k: z.number().default(5).describe("Number of results to return"),
+      intent: z.enum(MCPServerToolNames),
     },
     outputSchema: { text: z.string() },
     description: "Search knowledge base for relevant documents",
   },
-  async ({ query, k }): Promise<CallToolResult> => {
+  async ({ query, intent, k }): Promise<CallToolResult> => {
+    console.log(
+      `Search kb tool call. Query: ${query}\nIntent: ${intent} \nk: ${k}`,
+    );
     try {
       const results = await searchUseCase.execute(query, k);
       const textResponse = results
@@ -91,7 +89,7 @@ server.registerResource(
       contents: [
         {
           uri: "file:///intents.json",
-          text: JSON.stringify(intents),
+          text: IntentResource,
           mimeType: "application/json",
         },
       ],
@@ -195,7 +193,7 @@ server.registerTool(
   {
     title: "Create Ticket",
     description: "Create a ticket for the users query",
-    inputSchema: { ticket: z.object({}) },
+    inputSchema: { ticket: z.object({}), intent: z.enum(MCPServerToolNames) },
   },
   async ({ ticket }): Promise<CallToolResult> => {
     console.error(ticket);
