@@ -1,3 +1,5 @@
+# IMPORTANT: Make sure to avoid intent ovarlap as much as possible
+# to minimize the chance of misclassification!
 intents:
   - name: informational_query
     description: "User wants information only"
