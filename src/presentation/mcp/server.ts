@@ -63,6 +63,7 @@ server.registerTool(
         structuredContent: { text: textResponse },
       };
     } catch (err: any) {
+      console.log("Error searching knowledge base", err);
       return {
         content: [
           {
@@ -117,7 +118,7 @@ server.registerResource(
 // knowledge base document retrieval resource
 server.registerResource(
   "knowledge",
-  new ResourceTemplate("file://{filename}/", {
+  new ResourceTemplate("file:///{filename}", {
     list: undefined,
     // NOTE: uncomment to enable listing
     // list: () => {
@@ -147,6 +148,9 @@ Usage:
 - Use this resource after searching, before answering the user.`,
   },
   async (uri, { filename }): Promise<ReadResourceResult> => {
+    console.log(
+      `knowledge document resource call.\nuri: ${uri}, filename: ${filename}`,
+    );
     if (!filename) {
       console.error(`File name not provided`);
       return { contents: [{ text: "Filename is required", uri: uri.href }] };
