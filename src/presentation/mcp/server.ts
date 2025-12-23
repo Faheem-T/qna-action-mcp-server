@@ -197,10 +197,11 @@ server.registerTool(
   {
     title: "Create Ticket",
     description: "Create a ticket for the users query",
-    inputSchema: { ticket: z.object({}), intent: z.enum(MCPServerToolNames) },
+    inputSchema: { ticket: z.any(), intent: z.enum(MCPServerToolNames) },
   },
-  async ({ ticket }): Promise<CallToolResult> => {
-    console.error(ticket);
+  async (input): Promise<CallToolResult> => {
+    const { ticket } = input;
+    console.log(input);
     try {
       await createTicketUsecase.exec(ticket);
       return {
