@@ -2,6 +2,8 @@
 
 An intelligent MCP (Model Context Protocol) server designed to empower LLMs with RAG-based Q&A capabilities and actionable ticketing features.
 
+> **Note:** This server is expected to be used along with the [QnA Action MCP Client](https://github.com/Faheem-T/qna-action-mcp-client).
+
 ## Overview
 
 This project provides a robust backend for LLMs to act as intelligent agents. It features:
