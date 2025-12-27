@@ -26,6 +26,8 @@ async function readKBFile(filename: string) {
   return fileContent;
 }
 
+const INTENT_NAMES = config.intents.map((intent) => intent.name);
+
 export const server = new McpServer({
   name: "clean_qna_server",
   version: "1.0.0",
@@ -38,7 +40,7 @@ server.registerTool(
     inputSchema: {
       query: z.string().describe("The search query"),
       k: z.number().default(5).describe("Number of results to return"),
-      intent: z.enum(MCPServerToolNames),
+      intent: z.enum(INTENT_NAMES),
     },
     outputSchema: { text: z.string() },
     description: "Search knowledge base for relevant documents",
@@ -197,7 +199,10 @@ server.registerTool(
   {
     title: "Create Ticket",
     description: "Create a ticket for the users query",
-    inputSchema: { ticket: z.any(), intent: z.enum(MCPServerToolNames) },
+    inputSchema: {
+      ticket: z.any(),
+      intent: z.enum(INTENT_NAMES),
+    },
   },
   async (input): Promise<CallToolResult> => {
     const { ticket } = input;
