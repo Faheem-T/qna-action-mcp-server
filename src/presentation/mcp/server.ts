@@ -10,10 +10,7 @@ import type {
 import { createTicketUsecase, fs, searchUseCase } from "../../di";
 import { config, CONFIG_FOLDER } from "../../utils/loadConfig";
 import { ticketSchema } from "../../utils/loadTicketSchema";
-import {
-  MCPServerToolNames,
-  MCPServerTools,
-} from "../../constants/mcpServerToolNames";
+import { MCPServerTools } from "../../constants/mcpServerToolNames";
 import { IntentResource } from "./resources/IntentResource";
 
 export const knowledgeBaseDir =
@@ -193,7 +190,7 @@ server.registerResource(
   },
 );
 
-// TODO: create ticket tool
+// create ticket tool
 server.registerTool(
   MCPServerTools.CREATE_TICKET_TOOL,
   {

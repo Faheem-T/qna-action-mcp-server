@@ -25,6 +25,13 @@ DATABASE_URL=postgresql://user:password@localhost:5432/dbname
 
 ## Usage
 
+### Quick Start
+
+1. [Create the configuration files](#1-configuration-srcconfigs)
+2. [Place the knowledge base documents in the kb/ folder](#2-knowledge-base-srckb)
+3. [Run `bun run vectorize_kb` script](#3-scripts)
+4. [Run `bun start`](#3-scripts)
+
 ### 1. Configuration (`src/configs`)
 
 This server is fully config-driven. You must define your application behavior in `src/configs`.
@@ -45,7 +52,7 @@ files:
 *   **`intents.yaml`**: Define user intents and allowed tools.
     ```yaml
     intents:
-      support_query:
+      - name: support_query
         description: "User asks a support question"
         allowed_tools: ["search_knowledge_base"]
         risk_level: "low"
@@ -57,7 +64,7 @@ files:
     personas:
       support_agent:
         system_prompt: "You are a helpful support agent..."
-        max_length: 1000
+        max_response_tokens: 1000
     ```
 
 *   **`kb_index.yaml`**: Configure the knowledge base backend.
@@ -74,9 +81,45 @@ files:
     method: "POST"
     ```
 
+**Step 3: Create `ticket_schema.json` under `src/configs/schemas`**
+  
+```json
+// `src/configs/schemas/ticket_schema.json`
+{
+  "type": "object",
+  "required": ["category", "priority", "summary", "description", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": ["bug", "outage", "access", "billing", "other"]
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 120
+    },
+    "description": {
+      "type": "string",
+      "minLength": 20
+    },
+    "source": {
+      "const": "llm_generated"
+    }
+  }
+}
+```
+
 ### 2. Knowledge Base (`src/kb`)
 
 Place all your knowledge base documents (Markdown, Text, etc.) inside the `src/kb` folder (or the path configured in `kb_index.yaml`).
+
+> **Note:** Currently supported document formats are Markdown (`.md`) and Text (`.txt`).
+
 
 ### 3. Scripts
 
@@ -109,3 +152,9 @@ This MCP server exposes the following capabilities to connected clients:
 -   **`persona`**: (`file:///persona.json`) Returns the active AI persona configuration.
 -   **`knowledge`**: (`file://{filename}`) Direct access to read specific knowledge base files.
 -   **`ticket_schema`**: (`file:///ticket_schema.json`) Returns the schema definition for creating tickets.
+
+## Todo
+
+- [ ] Add notification tool
+- [ ] Add update record tool
+- [ ] Add chunk scoring for vector search
